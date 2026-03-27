@@ -1,7 +1,7 @@
 "use client"
 
 import Link from "next/link"
-import { useMemo } from "react"
+import { Suspense, useMemo } from "react"
 import { useSearchParams } from "next/navigation"
 import { decodeAnswers } from "@/lib/encodeAnswers"
 import { generateConfig } from "@/lib/generateConfig"
@@ -34,7 +34,7 @@ const LABEL_MAP: Record<string, string> = {
   maintainability: "Maintainability",
 }
 
-export default function ResultPage() {
+function ResultPageContent() {
   const searchParams = useSearchParams()
   const id = searchParams.get("id") ?? ""
 
@@ -88,5 +88,26 @@ export default function ResultPage() {
         </div>
       </div>
     </main>
+  )
+}
+
+function ResultPageFallback() {
+  return (
+    <main className="result-layout">
+      <header className="site-header result-topbar">
+        <span className="logo-mono">ESLINT GENERATOR</span>
+        <Link href="/" className="back-link">
+          ← back to quiz
+        </Link>
+      </header>
+    </main>
+  )
+}
+
+export default function ResultPage() {
+  return (
+    <Suspense fallback={<ResultPageFallback />}>
+      <ResultPageContent />
+    </Suspense>
   )
 }
