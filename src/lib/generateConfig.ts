@@ -1,496 +1,298 @@
 import type {
-  Concern,
-  Experience,
-  Framework,
-  GeneratedConfig,
-  Language,
   QuizAnswers,
+  GeneratedConfig,
   RuleExplanation,
   RuleSeverity,
-  Strictness,
-} from "@/types/quiz";
+} from "@/types/quiz"
 
-const DEFAULT_ANSWERS: QuizAnswers = {
-  framework: "vanilla",
-  lang: "js",
-  strictness: "moderate",
-  concerns: [],
-  experience: "mixed",
-};
-
-interface NormalizedAnswers {
-  framework: Framework;
-  lang: Language;
-  strictness: Strictness;
-  concerns: Concern[];
-  experience: Experience;
-}
-
-function resolveSeverity(
-  strictness: Strictness,
+function sev(
+  strictness: string,
   tight: RuleSeverity,
-  loose: RuleSeverity,
+  loose: RuleSeverity
 ): RuleSeverity {
-  return strictness === "relaxed" ? loose : tight;
+  if (strictness === "strict")  return tight
+  if (strictness === "relaxed") return loose
+  return tight
 }
 
-function addUnique(items: string[], value: string): void {
-  if (!items.includes(value)) {
-    items.push(value);
-  }
-}
+export function generateConfig(answers: Partial<QuizAnswers>): GeneratedConfig {
+  const {
+    framework  = "vanilla",
+    lang       = "js",
+    strictness = "moderate",
+    concerns   = [],
+    experience = "mixed",
+  } = answers
 
-function normalizeAnswers(answers: Partial<QuizAnswers>): NormalizedAnswers {
-  return {
-    framework: answers.framework ?? DEFAULT_ANSWERS.framework,
-    lang: answers.lang ?? DEFAULT_ANSWERS.lang,
-    strictness: answers.strictness ?? DEFAULT_ANSWERS.strictness,
-    concerns: answers.concerns ?? DEFAULT_ANSWERS.concerns,
-    experience: answers.experience ?? DEFAULT_ANSWERS.experience,
-  };
-}
+  const isTS    = lang === "ts" || lang === "mixed"
+  const isReact = framework === "react"
+  const isVue   = framework === "vue"
+  const isNode  = framework === "node"
+  const errSev  = sev(strictness, "error", "warn")
 
-function buildFilesList(
-  framework: Framework,
-  lang: Language,
-): string[] {
-  const isTS = lang === "ts" || lang === "mixed";
-
-  if (framework === "react") {
-    return isTS ? ["**/*.{js,jsx,ts,tsx}"] : ["**/*.{js,jsx}"];
-  }
-
-  if (framework === "vue") {
-    return isTS ? ["**/*.{js,mjs,cjs,ts,vue}"] : ["**/*.{js,mjs,cjs,vue}"];
-  }
-
-  if (framework === "node") {
-    return isTS ? ["**/*.{js,cjs,mjs,ts}"] : ["**/*.{js,cjs,mjs}"];
-  }
-
-  return isTS ? ["**/*.{js,mjs,cjs,ts}"] : ["**/*.{js,mjs,cjs}"];
-}
-
-function indentJson(input: Record<string, RuleSeverity>): string {
-  return JSON.stringify(input, null, 2).replace(/\n/g, "\n    ");
-}
-
-export function generateConfig(
-  answers: Partial<QuizAnswers>,
-): GeneratedConfig {
-  const { framework, lang, strictness, concerns, experience } =
-    normalizeAnswers(answers);
-  const isTS = lang === "ts" || lang === "mixed";
-  const isReact = framework === "react";
-  const isVue = framework === "vue";
-  const isNode = framework === "node";
-  const hasPrettier = concerns.includes("prettier");
-  const hasImports = concerns.includes("imports");
-  const hasA11y = concerns.includes("a11y");
-  const hasSecurity = concerns.includes("security");
-  const hasPerf = concerns.includes("perf");
-  const hasTesting = concerns.includes("testing");
-  const plugins: string[] = ["eslint"];
-  const rules: RuleExplanation[] = [];
-  const ruleMap: Record<string, RuleSeverity> = {};
-  const errSev = resolveSeverity(strictness, "error", "warn");
-
-  void experience;
-
-  const addRule = (
-    name: string,
-    severity: RuleSeverity,
-    desc: string,
-    why: string,
-    docs: string,
-  ): void => {
-    ruleMap[name] = severity;
-    rules.push({
-      name,
-      severity,
-      desc,
-      why,
-      docs,
-    });
-  };
+  // ── Plugins ──────────────────────────────────────────────────
+  const plugins: string[] = ["eslint"]
 
   if (isTS) {
-    addUnique(plugins, "@typescript-eslint/eslint-plugin");
-    addUnique(plugins, "@typescript-eslint/parser");
+    plugins.push("@typescript-eslint/eslint-plugin", "@typescript-eslint/parser")
   }
-
   if (isReact) {
-    addUnique(plugins, "eslint-plugin-react");
-    addUnique(plugins, "eslint-plugin-react-hooks");
+    plugins.push("eslint-plugin-react", "eslint-plugin-react-hooks")
   }
-
   if (isVue) {
-    addUnique(plugins, "eslint-plugin-vue");
-    addUnique(plugins, "vue-eslint-parser");
+    plugins.push("eslint-plugin-vue", "vue-eslint-parser")
   }
+  if (concerns.includes("prettier"))               plugins.push("eslint-config-prettier", "prettier")
+  if (concerns.includes("imports"))                plugins.push("eslint-plugin-import")
+  if (concerns.includes("a11y") && isReact)        plugins.push("eslint-plugin-jsx-a11y")
+  if (concerns.includes("security"))               plugins.push("eslint-plugin-security")
+  if (concerns.includes("testing"))                plugins.push("eslint-plugin-jest")
 
-  if (hasPrettier) {
-    addUnique(plugins, "eslint-config-prettier");
-    addUnique(plugins, "prettier");
-  }
+  // ── Rules ─────────────────────────────────────────────────────
+  const rules: RuleExplanation[] = []
 
-  if (hasImports) {
-    addUnique(plugins, "eslint-plugin-import");
-  }
+  rules.push({
+    name:     "no-unused-vars",
+    severity: errSev,
+    desc:     "Flags variables that are declared but never used in the code.",
+    why:      "Unused variables clutter your codebase and often signal logic errors or refactoring leftovers.",
+    docs:     "https://eslint.org/docs/rules/no-unused-vars",
+  })
 
-  if (isReact && hasA11y) {
-    addUnique(plugins, "eslint-plugin-jsx-a11y");
-  }
-
-  if (hasSecurity) {
-    addUnique(plugins, "eslint-plugin-security");
-  }
-
-  if (hasTesting) {
-    addUnique(plugins, "eslint-plugin-jest");
-  }
-
-  addRule(
-    "no-unused-vars",
-    errSev,
-    "Catches variables, arguments, and imports that are declared but never used.",
-    "Unused code adds noise and often hides bugs or unfinished refactors.",
-    "https://eslint.org/docs/latest/rules/no-unused-vars",
-  );
-  addRule(
-    "no-console",
-    "warn",
-    "Flags stray console calls that can slip into committed application code.",
-    "It keeps logs intentional instead of accidentally shipping debug output.",
-    "https://eslint.org/docs/latest/rules/no-console",
-  );
+  rules.push({
+    name:     "no-console",
+    severity: "warn",
+    desc:     "Warns when console.log (or similar) calls are left in the code.",
+    why:      "Debug logs should be removed before shipping — this keeps production output clean.",
+    docs:     "https://eslint.org/docs/rules/no-console",
+  })
 
   if (strictness !== "relaxed") {
-    addRule(
-      "eqeqeq",
-      errSev,
-      "Requires strict equality checks instead of the coercive == and != operators.",
-      "Strict comparisons avoid surprising type coercion at runtime.",
-      "https://eslint.org/docs/latest/rules/eqeqeq",
-    );
-    addRule(
-      "no-var",
-      errSev,
-      "Prevents var declarations in favor of modern block-scoped bindings.",
-      "let and const avoid hoisting confusion and accidental scope leaks.",
-      "https://eslint.org/docs/latest/rules/no-var",
-    );
-    addRule(
-      "prefer-const",
-      errSev,
-      "Encourages const when a variable is never reassigned after declaration.",
-      "Immutability makes intent clearer and reduces accidental mutations.",
-      "https://eslint.org/docs/latest/rules/prefer-const",
-    );
+    rules.push({
+      name:     "eqeqeq",
+      severity: errSev,
+      desc:     "Requires === instead of == for all equality checks.",
+      why:      "JavaScript's == has surprising type coercion rules. === prevents unintended comparisons.",
+      docs:     "https://eslint.org/docs/rules/eqeqeq",
+    })
+    rules.push({
+      name:     "no-var",
+      severity: errSev,
+      desc:     "Disallows var declarations in favour of let and const.",
+      why:      "var has function scope and hoisting quirks. let/const are block-scoped and more predictable.",
+      docs:     "https://eslint.org/docs/rules/no-var",
+    })
+    rules.push({
+      name:     "prefer-const",
+      severity: strictness === "strict" ? "error" : "warn",
+      desc:     "Requires const for variables that are never reassigned after declaration.",
+      why:      "Signals immutability intent clearly and prevents accidental reassignment.",
+      docs:     "https://eslint.org/docs/rules/prefer-const",
+    })
   }
 
   if (strictness === "strict") {
-    addRule(
-      "no-implicit-coercion",
-      "error",
-      "Rejects shorthand coercion tricks like !!foo or +value when they reduce clarity.",
-      "Explicit conversions are easier to read and safer for teammates to maintain.",
-      "https://eslint.org/docs/latest/rules/no-implicit-coercion",
-    );
+    rules.push({
+      name:     "no-implicit-coercion",
+      severity: "error",
+      desc:     "Disallows shorthand type conversions like !!value or +str.",
+      why:      "Explicit conversions like Boolean(value) are far more readable and intentional.",
+      docs:     "https://eslint.org/docs/rules/no-implicit-coercion",
+    })
   }
 
   if (isTS) {
-    addRule(
-      "@typescript-eslint/no-explicit-any",
-      errSev,
-      "Warns when values are typed as any and lose TypeScript's safety net.",
-      "Keeping types specific helps tooling catch issues before they ship.",
-      "https://typescript-eslint.io/rules/no-explicit-any/",
-    );
-    addRule(
-      "@typescript-eslint/explicit-function-return-type",
-      errSev,
-      "Requires function return types to be written out where clarity matters most.",
-      "Explicit returns help teams understand public APIs and avoid accidental widening.",
-      "https://typescript-eslint.io/rules/explicit-function-return-type/",
-    );
-
+    rules.push({
+      name:     "@typescript-eslint/no-explicit-any",
+      severity: errSev,
+      desc:     "Disallows use of the any type.",
+      why:      "any defeats the purpose of TypeScript. Prefer unknown or define a proper type instead.",
+      docs:     "https://typescript-eslint.io/rules/no-explicit-any",
+    })
+    rules.push({
+      name:     "@typescript-eslint/explicit-function-return-type",
+      severity: strictness === "strict" ? "error" : "warn",
+      desc:     "Requires explicit return types on public functions.",
+      why:      "Makes function contracts clear at a glance and catches type mismatches at definition time.",
+      docs:     "https://typescript-eslint.io/rules/explicit-function-return-type",
+    })
     if (strictness === "strict") {
-      addRule(
-        "@typescript-eslint/no-non-null-assertion",
-        "error",
-        "Prevents the non-null assertion operator from bypassing possible null checks.",
-        "It nudges you toward safer control flow instead of silencing uncertainty.",
-        "https://typescript-eslint.io/rules/no-non-null-assertion/",
-      );
+      rules.push({
+        name:     "@typescript-eslint/no-non-null-assertion",
+        severity: "error",
+        desc:     "Disallows the non-null assertion operator (!).",
+        why:      "Using ! silences the type checker without actually fixing the nullability issue.",
+        docs:     "https://typescript-eslint.io/rules/no-non-null-assertion",
+      })
     }
   }
 
   if (isReact) {
-    addRule(
-      "react-hooks/rules-of-hooks",
-      "error",
-      "Enforces the rules of Hooks so React state and effects stay predictable.",
-      "Incorrect hook usage can break render ordering in subtle, hard-to-debug ways.",
-      "https://react.dev/reference/eslint-plugin-react-hooks/lints/rules-of-hooks",
-    );
-    addRule(
-      "react-hooks/exhaustive-deps",
-      "warn",
-      "Checks dependency arrays so effects stay in sync with the values they use.",
-      "Missing dependencies can create stale state and inconsistent side effects.",
-      "https://react.dev/reference/eslint-plugin-react-hooks/lints/exhaustive-deps",
-    );
+    rules.push({
+      name:     "react-hooks/rules-of-hooks",
+      severity: "error",
+      desc:     "Enforces the Rules of Hooks — always call hooks at the top level.",
+      why:      "Violating hook rules causes unpredictable state behaviour that is very hard to debug.",
+      docs:     "https://reactjs.org/docs/hooks-rules.html",
+    })
+    rules.push({
+      name:     "react-hooks/exhaustive-deps",
+      severity: "warn",
+      desc:     "Checks that useEffect and similar hooks list all their dependencies correctly.",
+      why:      "Missing deps cause stale closures; extra deps cause unnecessary re-renders.",
+      docs:     "https://reactjs.org/docs/hooks-reference.html",
+    })
+    if (concerns.includes("a11y")) {
+      rules.push({
+        name:     "jsx-a11y/alt-text",
+        severity: "error",
+        desc:     "Enforces alt text on <img> and other media elements.",
+        why:      "Missing alt text breaks screen readers for visually impaired users.",
+        docs:     "https://github.com/jsx-eslint/eslint-plugin-jsx-a11y/blob/main/docs/rules/alt-text.md",
+      })
+      rules.push({
+        name:     "jsx-a11y/anchor-is-valid",
+        severity: "error",
+        desc:     "Ensures <a> elements have valid href attributes.",
+        why:      "Invalid anchors break keyboard navigation and assistive technology.",
+        docs:     "https://github.com/jsx-eslint/eslint-plugin-jsx-a11y/blob/main/docs/rules/anchor-is-valid.md",
+      })
+    }
   }
 
-  if (isReact && hasA11y) {
-    addRule(
-      "jsx-a11y/alt-text",
-      errSev,
-      "Ensures images and similar elements include meaningful alternative text.",
-      "Accessible markup makes interfaces usable for assistive technologies.",
-      "https://github.com/jsx-eslint/eslint-plugin-jsx-a11y/blob/main/docs/rules/alt-text.md",
-    );
+  if (concerns.includes("security")) {
+    rules.push({
+      name:     "no-eval",
+      severity: "error",
+      desc:     "Disallows the use of eval().",
+      why:      "eval() is a critical security risk — it can execute arbitrary code from user input.",
+      docs:     "https://eslint.org/docs/rules/no-eval",
+    })
+    rules.push({
+      name:     "no-implied-eval",
+      severity: "error",
+      desc:     "Disallows setTimeout/setInterval with string arguments.",
+      why:      "Passing strings to timers is an implicit eval() — the same security risks apply.",
+      docs:     "https://eslint.org/docs/rules/no-implied-eval",
+    })
   }
 
-  if (hasSecurity) {
-    addRule(
-      "no-eval",
-      "error",
-      "Blocks eval calls that execute arbitrary strings as code.",
-      "Dynamic code execution creates security risks and makes behavior harder to reason about.",
-      "https://eslint.org/docs/latest/rules/no-eval",
-    );
-    addRule(
-      "no-implied-eval",
-      "error",
-      "Prevents string-based timers and similar patterns that behave like eval.",
-      "Avoiding implicit evaluation reduces injection risk and keeps code paths explicit.",
-      "https://eslint.org/docs/latest/rules/no-implied-eval",
-    );
+  if (concerns.includes("imports")) {
+    rules.push({
+      name:     "import/order",
+      severity: "warn",
+      desc:     "Enforces a consistent import ordering convention.",
+      why:      "Consistent import order makes files easier to scan and reduces noisy diffs.",
+      docs:     "https://github.com/import-js/eslint-plugin-import/blob/main/docs/rules/order.md",
+    })
+    rules.push({
+      name:     "import/no-duplicates",
+      severity: errSev,
+      desc:     "Disallows duplicate imports from the same module.",
+      why:      "Duplicate imports add confusion and potential for conflicting references.",
+      docs:     "https://github.com/import-js/eslint-plugin-import/blob/main/docs/rules/no-duplicates.md",
+    })
   }
 
-  if (hasImports) {
-    addRule(
-      "import/order",
-      "warn",
-      "Encourages a consistent import order so files scan cleanly from the top.",
-      "Predictable import structure makes large modules easier to review and maintain.",
-      "https://github.com/import-js/eslint-plugin-import/blob/main/docs/rules/order.md",
-    );
-    addRule(
-      "import/no-duplicates",
-      errSev,
-      "Flags repeated imports from the same module in a single file.",
-      "Duplicate imports add clutter and can hide accidental merge leftovers.",
-      "https://github.com/import-js/eslint-plugin-import/blob/main/docs/rules/no-duplicates.md",
-    );
+  if (concerns.includes("perf") && isReact) {
+    rules.push({
+      name:     "react/jsx-no-bind",
+      severity: "warn",
+      desc:     "Discourages inline arrow functions in JSX props.",
+      why:      "Inline functions recreate on every render, which can hurt performance in large lists.",
+      docs:     "https://github.com/jsx-eslint/eslint-plugin-react/blob/master/docs/rules/jsx-no-bind.md",
+    })
   }
 
-  if (hasPerf && isReact) {
-    addRule(
-      "react/jsx-no-bind",
-      "warn",
-      "Discourages creating new function instances inline inside JSX props.",
-      "Stable references can reduce unnecessary renders in heavily reused components.",
-      "https://github.com/jsx-eslint/eslint-plugin-react/blob/master/docs/rules/jsx-no-bind.md",
-    );
+  if (concerns.includes("testing")) {
+    rules.push({
+      name:     "jest/no-disabled-tests",
+      severity: "warn",
+      desc:     "Warns about skipped tests using .skip or xit.",
+      why:      "Skipped tests that are never re-enabled create false confidence in test coverage.",
+      docs:     "https://github.com/jest-community/eslint-plugin-jest/blob/main/docs/rules/no-disabled-tests.md",
+    })
+    rules.push({
+      name:     "jest/expect-expect",
+      severity: "error",
+      desc:     "Requires at least one expect() call in every test.",
+      why:      "Tests without assertions always pass, giving a false sense of security.",
+      docs:     "https://github.com/jest-community/eslint-plugin-jest/blob/main/docs/rules/expect-expect.md",
+    })
   }
 
-  const importLines: string[] = [];
-  const spreadLines: string[] = [];
-  const pluginEntries: string[] = [];
-  const files = buildFilesList(framework, lang);
-
+  // ── Flat config (eslint.config.js) ───────────────────────────
+  const importLines: string[] = [`import js from "@eslint/js"`]
   if (isTS) {
-    importLines.push(
-      'import tseslint from "@typescript-eslint/eslint-plugin";',
-      'import tsParser from "@typescript-eslint/parser";',
-    );
-    spreadLines.push("  tseslint.configs.recommended,");
-    pluginEntries.push('"@typescript-eslint": tseslint');
+    importLines.push(`import tsParser from "@typescript-eslint/parser"`)
+    importLines.push(`import tsPlugin from "@typescript-eslint/eslint-plugin"`)
   }
-
   if (isReact) {
-    importLines.push(
-      'import reactPlugin from "eslint-plugin-react";',
-      'import reactHooks from "eslint-plugin-react-hooks";',
-    );
-    spreadLines.push(
-      "  reactPlugin.configs.flat.recommended,",
-      "  reactHooks.configs.recommended,",
-    );
-    pluginEntries.push('react: reactPlugin', '"react-hooks": reactHooks');
+    importLines.push(`import reactPlugin from "eslint-plugin-react"`)
+    importLines.push(`import reactHooks from "eslint-plugin-react-hooks"`)
   }
+  if (isVue)                            importLines.push(`import vuePlugin from "eslint-plugin-vue"`)
+  if (concerns.includes("prettier"))    importLines.push(`import prettierConfig from "eslint-config-prettier"`)
+  if (concerns.includes("imports"))     importLines.push(`import importPlugin from "eslint-plugin-import"`)
+  if (concerns.includes("a11y") && isReact) importLines.push(`import a11yPlugin from "eslint-plugin-jsx-a11y"`)
+  if (concerns.includes("security"))    importLines.push(`import securityPlugin from "eslint-plugin-security"`)
 
-  if (isVue) {
-    importLines.push(
-      'import vuePlugin from "eslint-plugin-vue";',
-      'import vueParser from "vue-eslint-parser";',
-    );
-    spreadLines.push('  ...vuePlugin.configs["flat/recommended"],');
-    pluginEntries.push('vue: vuePlugin');
-  }
+  const ruleEntries = rules
+    .map((r) => `      "${r.name}": "${r.severity}"`)
+    .join(",\n")
 
-  if (hasPrettier) {
-    importLines.push('import prettierConfig from "eslint-config-prettier";');
-    spreadLines.push("  prettierConfig,");
-  }
+  const extendsLines: string[] = ["  js.configs.recommended"]
+  if (isTS)    extendsLines.push("  ...tsPlugin.configs.recommended")
+  if (isReact) extendsLines.push("  reactPlugin.configs.flat.recommended")
+  if (concerns.includes("prettier")) extendsLines.push("  prettierConfig")
 
-  if (hasImports) {
-    importLines.push('import importPlugin from "eslint-plugin-import";');
-    spreadLines.push("  importPlugin.flatConfigs.recommended,");
-    pluginEntries.push('import: importPlugin');
-  }
+  const parserLine   = isTS ? `    languageOptions: { parser: tsParser },\n` : ""
+  const fileGlob     = isTS ? `"**/*.{ts,tsx}"` : `"**/*.{js,jsx}"`
 
-  if (isReact && hasA11y) {
-    importLines.push('import jsxA11y from "eslint-plugin-jsx-a11y";');
-    spreadLines.push("  jsxA11y.flatConfigs.recommended,");
-    pluginEntries.push('"jsx-a11y": jsxA11y');
-  }
-
-  if (hasSecurity) {
-    importLines.push('import securityPlugin from "eslint-plugin-security";');
-    spreadLines.push("  securityPlugin.configs.recommended,");
-    pluginEntries.push('security: securityPlugin');
-  }
-
-  if (hasTesting) {
-    importLines.push('import jestPlugin from "eslint-plugin-jest";');
-    spreadLines.push('  jestPlugin.configs["flat/recommended"],');
-    pluginEntries.push('jest: jestPlugin');
-  }
-
-  const configObjectLines: string[] = [
+  const flatConfig = [
+    importLines.join("\n"),
+    "",
+    "export default [",
+    extendsLines.join(",\n") + ",",
     "  {",
-    `    files: ${JSON.stringify(files)},`,
-  ];
+    `    files: [${fileGlob}],`,
+    parserLine + "    rules: {",
+    ruleEntries,
+    "    },",
+    "  },",
+    "]",
+  ].join("\n")
 
-  if (isTS || isVue) {
-    configObjectLines.push("    languageOptions: {");
-    configObjectLines.push('      ecmaVersion: "latest",');
-    configObjectLines.push('      sourceType: "module",');
+  // ── Legacy config (.eslintrc.json) ───────────────────────────
+  const legacyExtends: string[] = ["eslint:recommended"]
+  if (isTS)    legacyExtends.push("plugin:@typescript-eslint/recommended")
+  if (isReact) legacyExtends.push("plugin:react/recommended", "plugin:react-hooks/recommended")
+  if (isVue)   legacyExtends.push("plugin:vue/vue3-recommended")
+  if (concerns.includes("a11y") && isReact) legacyExtends.push("plugin:jsx-a11y/recommended")
+  if (concerns.includes("prettier")) legacyExtends.push("prettier")
 
-    if (isVue) {
-      configObjectLines.push("      parser: vueParser,");
+  const legacyRules: Record<string, string> = {}
+  rules.forEach((r) => { legacyRules[r.name] = r.severity })
 
-      if (isTS) {
-        configObjectLines.push("      parserOptions: {");
-        configObjectLines.push("        parser: tsParser,");
-        configObjectLines.push("      },");
-      }
-    } else if (isTS) {
-      configObjectLines.push("      parser: tsParser,");
-    }
-
-    configObjectLines.push("    },");
-  }
-
-  if (pluginEntries.length > 0) {
-    configObjectLines.push("    plugins: {");
-    pluginEntries.forEach((entry) => {
-      configObjectLines.push(`      ${entry},`);
-    });
-    configObjectLines.push("    },");
-  }
-
-  configObjectLines.push(`    rules: ${indentJson(ruleMap)}`);
-  configObjectLines.push("  },");
-
-  const flatConfigSections: string[] = [];
-
-  if (importLines.length > 0) {
-    flatConfigSections.push(importLines.join("\n"));
-  }
-
-  flatConfigSections.push(
-    [
-      "export default [",
-      ...spreadLines,
-      ...configObjectLines,
-      "];",
-    ].join("\n"),
-  );
-
-  const flatConfig = flatConfigSections.join("\n\n");
-
-  const legacyExtends: string[] = [];
-
-  if (isTS) {
-    legacyExtends.push("plugin:@typescript-eslint/recommended");
-  }
-
-  if (isReact) {
-    legacyExtends.push(
-      "plugin:react/recommended",
-      "plugin:react-hooks/recommended",
-    );
-  }
-
-  if (isVue) {
-    legacyExtends.push("plugin:vue/vue3-recommended");
-  }
-
-  if (hasImports) {
-    legacyExtends.push("plugin:import/recommended");
-  }
-
-  if (isReact && hasA11y) {
-    legacyExtends.push("plugin:jsx-a11y/recommended");
-  }
-
-  if (hasSecurity) {
-    legacyExtends.push("plugin:security/recommended");
-  }
-
-  if (hasTesting) {
-    legacyExtends.push("plugin:jest/recommended");
-  }
-
-  if (hasPrettier) {
-    legacyExtends.push("prettier");
-  }
-
-  const legacyConfigObject: {
-    env: Record<string, boolean>;
-    extends: string[];
-    parser?: string;
-    parserOptions?: Record<string, string>;
-    rules: Record<string, RuleSeverity>;
-  } = {
+  const legacyObj = {
     env: {
       browser: !isNode,
-      es2022: true,
-      jest: hasTesting,
-      node: isNode,
+      node:    isNode || framework === "vanilla",
+      es2022:  true,
     },
     extends: legacyExtends,
-    rules: ruleMap,
-  };
+    ...(isTS ? { parser: "@typescript-eslint/parser" } : {}),
+    rules: legacyRules,
+  }
+  const legacyConfig = JSON.stringify(legacyObj, null, 2)
 
-  if (isVue) {
-    legacyConfigObject.parser = "vue-eslint-parser";
-
-    if (isTS) {
-      legacyConfigObject.parserOptions = {
-        parser: "@typescript-eslint/parser",
-      };
-    }
-  } else if (isTS) {
-    legacyConfigObject.parser = "@typescript-eslint/parser";
+  // ── Install commands ─────────────────────────────────────────
+  const pkgList = plugins.join(" ")
+  const installCmd = {
+    npm:  `npm install -D ${pkgList}`,
+    pnpm: `pnpm add -D ${pkgList}`,
+    yarn: `yarn add -D ${pkgList}`,
   }
 
-  const legacyConfig = JSON.stringify(legacyConfigObject, null, 2);
-
-  return {
-    flatConfig,
-    legacyConfig,
-    rules,
-    plugins,
-    installCmd: {
-      npm: `npm install -D ${plugins.join(" ")}`,
-      pnpm: `pnpm add -D ${plugins.join(" ")}`,
-      yarn: `yarn add -D ${plugins.join(" ")}`,
-    },
-  };
+  return { flatConfig, legacyConfig, rules, plugins, installCmd }
 }

@@ -1,139 +1,63 @@
-import type { QuizStep } from "@/types/quiz";
+import type { QuizStep } from "@/types/quiz"
 
 export const QUIZ_STEPS: QuizStep[] = [
   {
     id: "framework",
     question: "What framework are you using?",
-    sub: "Pick the environment your config should feel native to.",
+    sub: "Determines which plugins and parser rules we include.",
     type: "single",
     options: [
-      {
-        value: "react",
-        label: "React",
-        desc: "Component-first apps with JSX, hooks, and client-side patterns.",
-      },
-      {
-        value: "vue",
-        label: "Vue",
-        desc: "Single-file components and a rule set that respects Vue conventions.",
-      },
-      {
-        value: "node",
-        label: "Node.js",
-        desc: "Server-side code, scripts, services, and tooling-heavy projects.",
-      },
-      {
-        value: "vanilla",
-        label: "Vanilla",
-        desc: "Framework-free JavaScript with a clean, modern baseline.",
-      },
+      { value: "react",   label: "React",             desc: "Hooks rules, JSX, component patterns" },
+      { value: "vue",     label: "Vue",               desc: "Vue 3, Composition API" },
+      { value: "node",    label: "Node.js",           desc: "Server-side, CommonJS or ESM" },
+      { value: "vanilla", label: "Vanilla JS / Other",desc: "No framework-specific rules" },
     ],
   },
   {
     id: "lang",
     question: "JavaScript or TypeScript?",
-    sub: "We’ll adjust parsers, plugin packages, and recommended presets.",
+    sub: "TypeScript unlocks type-aware linting rules.",
     type: "single",
     options: [
-      {
-        value: "ts",
-        label: "TypeScript",
-        desc: "Typed source files with TypeScript-aware linting rules.",
-      },
-      {
-        value: "js",
-        label: "JavaScript",
-        desc: "A lean setup focused on modern JavaScript projects.",
-      },
-      {
-        value: "mixed",
-        label: "Mixed",
-        desc: "Teams shipping a blend of JavaScript and TypeScript files.",
-      },
+      { value: "ts",    label: "TypeScript",              desc: "@typescript-eslint parser + rules" },
+      { value: "js",    label: "JavaScript only",         desc: "Standard ESLint parser" },
+      { value: "mixed", label: "Both (.ts and .js files)", desc: "Dual config per extension" },
     ],
   },
   {
     id: "strictness",
     question: "How strict should the rules be?",
-    sub: "Choose how opinionated the generated config should feel day to day.",
+    sub: "Sets the default severity level across the config.",
     type: "single",
     options: [
-      {
-        value: "relaxed",
-        label: "Relaxed",
-        desc: "Helpful nudges without too much friction while moving fast.",
-      },
-      {
-        value: "moderate",
-        label: "Moderate",
-        desc: "A strong default that catches real issues without being noisy.",
-      },
-      {
-        value: "strict",
-        label: "Strict",
-        desc: "Sharper enforcement for teams that want tighter guardrails.",
-      },
+      { value: "relaxed",  label: "Relaxed",  desc: "Warnings only — good for prototypes" },
+      { value: "moderate", label: "Moderate", desc: "Balanced — recommended for most teams" },
+      { value: "strict",   label: "Strict",   desc: "Most rules as errors — zero tolerance" },
     ],
   },
   {
     id: "concerns",
     question: "Any specific concerns to enforce?",
-    sub: "Select the extra areas you care about. Skip this step to stay minimal.",
+    sub: "Select all that apply — targeted rules added for each.",
     type: "multi",
     options: [
-      {
-        value: "prettier",
-        label: "Prettier",
-        desc: "Avoid stylistic clashes when formatting is handled elsewhere.",
-      },
-      {
-        value: "imports",
-        label: "Imports",
-        desc: "Keep imports ordered, tidy, and free of accidental duplicates.",
-      },
-      {
-        value: "a11y",
-        label: "Accessibility",
-        desc: "Catch common JSX accessibility misses in React interfaces.",
-      },
-      {
-        value: "security",
-        label: "Security",
-        desc: "Flag risky APIs and patterns that deserve a second look.",
-      },
-      {
-        value: "perf",
-        label: "Performance",
-        desc: "Discourage patterns that can create avoidable React churn.",
-      },
-      {
-        value: "testing",
-        label: "Testing",
-        desc: "Include test-focused recommendations for Jest-driven projects.",
-      },
+      { value: "prettier",  label: "Code formatting", desc: "Prettier integration" },
+      { value: "imports",   label: "Import order",    desc: "eslint-plugin-import" },
+      { value: "a11y",      label: "Accessibility",   desc: "jsx-a11y (React only)" },
+      { value: "security",  label: "Security",        desc: "eslint-plugin-security" },
+      { value: "perf",      label: "Performance",     desc: "Avoid common perf traps" },
+      { value: "testing",   label: "Testing",         desc: "jest / vitest rules" },
     ],
   },
   {
     id: "experience",
     question: "Who is writing this code?",
-    sub: "This helps frame the output for the kind of team reading the rules.",
+    sub: "Adjusts how helpful vs. restrictive the config feels.",
     type: "single",
     options: [
-      {
-        value: "beginner",
-        label: "Beginner",
-        desc: "Newer developers who benefit from clear guardrails and guidance.",
-      },
-      {
-        value: "mixed",
-        label: "Mixed team",
-        desc: "A balanced setup for teams with a range of experience levels.",
-      },
-      {
-        value: "senior",
-        label: "Senior",
-        desc: "Experienced contributors who prefer firmer defaults and fewer surprises.",
-      },
+      { value: "beginner", label: "Beginners / learners",   desc: "More explanatory, fewer gotchas" },
+      { value: "mixed",    label: "Mixed team",             desc: "Balanced for all levels" },
+      { value: "senior",   label: "Experienced developers", desc: "Full strict, no hand-holding" },
     ],
   },
-];
+]

@@ -1,82 +1,60 @@
-"use client";
+"use client"
+import { useState } from "react"
+import type { RuleExplanation } from "@/types/quiz"
 
-import { useState } from "react";
-
-import type { RuleExplanation } from "@/types/quiz";
-
-interface RuleExplainerProps {
-  rules: RuleExplanation[];
+interface Props {
+  rules: RuleExplanation[]
 }
 
-function getSeverityClass(severity: RuleExplanation["severity"]): string {
-  if (severity === "error") {
-    return "sev-error";
+export function RuleExplainer({ rules }: Props) {
+  const [open, setOpen] = useState<string | null>(null)
+
+  function toggle(name: string): void {
+    setOpen(open === name ? null : name)
   }
 
-  if (severity === "warn") {
-    return "sev-warn";
+  function severityClass(sev: string): string {
+    if (sev === "error") return "sev-error"
+    if (sev === "warn")  return "sev-warn"
+    return "sev-off"
   }
-
-  return "sev-off";
-}
-
-export function RuleExplainer({ rules }: RuleExplainerProps) {
-  const [openRule, setOpenRule] = useState<string | null>(
-    rules[0]?.name ?? null,
-  );
 
   return (
-    <section className="block">
+    <div className="block rule-explainer">
       <div className="block-header">
         <span className="block-title">RULES EXPLAINED</span>
+        <span className="rule-count">{rules.length} rules</span>
       </div>
-      <div className="rule-list">
-        {rules.map((rule) => {
-          const isOpen = openRule === rule.name;
-
-          return (
-            <article key={rule.name} className="rule-item">
-              <button
-                type="button"
-                className="rule-row"
-                onClick={() => setOpenRule(isOpen ? null : rule.name)}
-              >
-                <span className="rule-left">
-                  <span className="rule-name">{rule.name}</span>
-                  <span className={`severity ${getSeverityClass(rule.severity)}`}>
-                    {rule.severity}
-                  </span>
-                </span>
-                <span
-                  className={`rule-chevron${isOpen ? " open" : ""}`}
-                  aria-hidden="true"
+      {rules.map((rule) => (
+        <div key={rule.name} className="rule-item">
+          <button className="rule-row" onClick={() => toggle(rule.name)}>
+            <span className="rule-name">{rule.name}</span>
+            <span className={`severity ${severityClass(rule.severity)}`}>
+              {rule.severity}
+            </span>
+            <span className={`chevron ${open === rule.name ? "open" : ""}`}>
+              ▶
+            </span>
+          </button>
+          {open === rule.name && (
+            <div className="rule-body">
+              <p>{rule.desc}</p>
+              <p className="rule-why">
+                <strong>Why this rule?</strong> {rule.why}
+              </p>
+              {rule.docs && (
+                <a className="rule-docs"
+                  href={rule.docs}
+                  target="_blank"
+                  rel="noreferrer"
                 >
-                  ▶
-                </span>
-              </button>
-
-              {isOpen ? (
-                <div className="rule-body">
-                  <p>{rule.desc}</p>
-                  <p>
-                    <span className="rule-body-label">Why this rule?</span> {rule.why}
-                  </p>
-                  {rule.docs ? (
-                    <a
-                      className="rule-link"
-                      href={rule.docs}
-                      target="_blank"
-                      rel="noreferrer"
-                    >
-                      Read the docs →
-                    </a>
-                  ) : null}
-                </div>
-              ) : null}
-            </article>
-          );
-        })}
-      </div>
-    </section>
-  );
+                  ESLint docs →
+                </a>
+              )}
+            </div>
+          )}
+        </div>
+      ))}
+    </div>
+  )
 }

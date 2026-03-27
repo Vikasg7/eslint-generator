@@ -1,44 +1,29 @@
-"use client";
+"use client"
+import { useState } from "react"
+import { buildShareUrl } from "@/lib/encodeAnswers"
+import type { QuizAnswers } from "@/types/quiz"
 
-import { useState } from "react";
-
-import { buildShareUrl } from "@/lib/encodeAnswers";
-import type { QuizAnswers } from "@/types/quiz";
-
-interface ShareButtonProps {
-  answers: Partial<QuizAnswers>;
+interface Props {
+  answers: Partial<QuizAnswers>
 }
 
-export function ShareButton({ answers }: ShareButtonProps) {
-  const [copyLabel, setCopyLabel] = useState("copy link");
-  const sharePath = buildShareUrl(answers, "");
+export function ShareButton({ answers }: Props) {
+  const [copied, setCopied] = useState(false)
+  const url = buildShareUrl(answers)
 
-  const handleCopy = async (): Promise<void> => {
-    await navigator.clipboard.writeText(buildShareUrl(answers));
-    setCopyLabel("copied!");
-
-    window.setTimeout(() => {
-      setCopyLabel("copy link");
-    }, 1500);
-  };
+  async function handleCopy(): Promise<void> {
+    await navigator.clipboard.writeText(url)
+    setCopied(true)
+    setTimeout(() => setCopied(false), 2000)
+  }
 
   return (
-    <section className="block">
-      <div className="block-header">
-        <span className="block-title">SHARE URL</span>
-      </div>
-      <div className="share-bar">
-        <span className="share-url" title={sharePath}>
-          {sharePath}
-        </span>
-        <button
-          type="button"
-          className="action-btn primary"
-          onClick={handleCopy}
-        >
-          {copyLabel}
-        </button>
-      </div>
-    </section>
-  );
+    <div className="share-bar">
+      <span className="share-label">share</span>
+      <span className="share-url" title={url}>{url}</span>
+      <button className="action-btn" onClick={handleCopy}>
+        {copied ? "copied!" : "copy link"}
+      </button>
+    </div>
+  )
 }

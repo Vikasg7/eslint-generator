@@ -1,44 +1,42 @@
-import type { Metadata } from "next";
-import { JetBrains_Mono, Syne } from "next/font/google";
-
-import "./globals.css";
+import type { Metadata } from "next"
+import { Syne, JetBrains_Mono } from "next/font/google"
+import "./globals.css"
 
 const syne = Syne({
-  subsets: ["latin"],
-  weight: ["400", "500", "600", "700", "800"],
+  subsets:  ["latin"],
+  weight:   ["400", "500", "600", "700", "800"],
   variable: "--font-syne",
-});
+  display:  "swap",
+})
 
 const jetbrainsMono = JetBrains_Mono({
-  subsets: ["latin"],
-  weight: ["400", "500"],
+  subsets:  ["latin"],
+  weight:   ["400", "500"],
   variable: "--font-jetbrains",
-});
+  display:  "swap",
+})
 
 export const metadata: Metadata = {
-  title: "Intuitive ESLint Generator",
-  description:
-    "Walk through five quick questions and generate a tailored ESLint config with install commands, rule explanations, and a shareable URL.",
+  title:       "ESLint Generator — Config done right",
+  description: "Answer 5 questions. Get a tailored ESLint config with every rule explained — flat or legacy format, ready to paste.",
   openGraph: {
-    title: "Intuitive ESLint Generator",
-    description:
-      "ESLint config, done right. Generate a tailored config with explanations and a shareable URL.",
-    siteName: "Intuitive ESLint Generator",
-    type: "website",
+    title:       "ESLint Generator",
+    description: "Tailored ESLint config in 5 questions. Zero signup.",
+    type:        "website",
   },
-  icons: {
-    icon: "/favicon.svg",
-  },
-};
+}
 
 export default function RootLayout({
   children,
-}: Readonly<{
-  children: React.ReactNode;
-}>) {
+}: {
+  children: React.ReactNode
+}) {
   return (
-    <html lang="en" className={`${syne.variable} ${jetbrainsMono.variable}`}>
+    <html
+      lang="en"
+      className={`${syne.variable} ${jetbrainsMono.variable}`}
+    >
       <body>{children}</body>
     </html>
-  );
+  )
 }

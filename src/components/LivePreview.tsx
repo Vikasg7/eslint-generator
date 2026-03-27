@@ -1,35 +1,32 @@
-"use client";
+"use client"
+import { useMemo } from "react"
+import { generateConfig } from "@/lib/generateConfig"
+import type { QuizAnswers } from "@/types/quiz"
 
-import { useMemo } from "react";
-
-import { generateConfig } from "@/lib/generateConfig";
-import type { QuizAnswers } from "@/types/quiz";
-
-interface LivePreviewProps {
-  answers: Partial<QuizAnswers>;
+interface Props {
+  answers: Partial<QuizAnswers>
 }
 
-export function LivePreview({ answers }: LivePreviewProps) {
-  const previewLines = useMemo(() => {
-    const lines = generateConfig(answers).flatConfig.split("\n");
-    const truncated = lines.slice(0, 18);
-
-    if (lines.length > 18) {
-      truncated.push("···");
-    }
-
-    return truncated.join("\n");
-  }, [answers]);
+export function LivePreview({ answers }: Props) {
+  const config = useMemo(() => generateConfig(answers), [answers])
+  const lines  = config.flatConfig.split("\n")
+  const preview = lines.slice(0, 18)
+  const hasMore = lines.length > 18
 
   return (
-    <aside className="block live-preview">
-      <div className="block-header preview-header">
-        <div className="preview-status">
-          <span className="preview-dot" aria-hidden="true" />
-          <span className="block-title">LIVE PREVIEW</span>
-        </div>
+    <aside className="live-preview">
+      <div className="preview-header">
+        <span className="preview-dot" />
+        <span className="preview-title">LIVE PREVIEW</span>
       </div>
-      <pre className="preview-body">{previewLines}</pre>
+      <pre className="preview-body">
+        {preview.map((line, i) => (
+          <div key={i} className="preview-line">
+            {line || " "}
+          </div>
+        ))}
+        {hasMore && <div className="preview-line muted">  ···</div>}
+      </pre>
     </aside>
-  );
+  )
 }
