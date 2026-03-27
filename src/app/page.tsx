@@ -68,7 +68,7 @@ export default function HomePage() {
                 Start the quiz →
               </button>
               <a className="btn-ghost"
-                href="https://github.com"
+                href="https://github.com/Vikasg7/eslint-generator"
                 target="_blank"
                 rel="noreferrer"
               >

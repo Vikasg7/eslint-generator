@@ -91,7 +91,7 @@ The workflow will:
 If the site is deployed as a project page, for example:
 
 ```text
-https://username.github.io/eslint-generator/
+https://vikasg7.github.io/eslint-generator/
 ```
 
 the build automatically uses `/eslint-generator` as the base path during GitHub Actions.
@@ -99,7 +99,7 @@ the build automatically uses `/eslint-generator` as the base path during GitHub 
 If the site is deployed as a user/org root site such as:
 
 ```text
-https://username.github.io/
+https://vikasg7.github.io/
 ```
 
 no base path is added.
