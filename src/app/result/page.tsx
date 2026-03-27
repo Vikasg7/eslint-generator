@@ -69,8 +69,8 @@ function ResultPageContent() {
       </header>
 
       <div className="tags-row">
-        {tags.map((tag) => (
-          <span key={tag} className="tag">
+        {tags.map((tag, index) => (
+          <span key={`${tag}-${index}`} className="tag">
             {tag}
           </span>
         ))}
