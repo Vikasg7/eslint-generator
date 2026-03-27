@@ -26,8 +26,10 @@ export function InstallCommand({ installCmd }: Props) {
         {(["npm", "pnpm", "yarn"] as PM[]).map((pm) => (
           <div key={pm} className="install-row">
             <span className="pm-label">{pm}</span>
-            <span className="install-cmd">{installCmd[pm]}</span>
-            <button className="copy-mini" onClick={() => copy(pm)}>
+            <div className="install-cmd-scroll">
+              <span className="install-cmd">{installCmd[pm]}</span>
+            </div>
+            <button type="button" className="copy-mini" onClick={() => copy(pm)}>
               {copiedPm === pm ? "✓" : "copy"}
             </button>
           </div>

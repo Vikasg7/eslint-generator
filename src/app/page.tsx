@@ -44,6 +44,9 @@ export default function HomePage() {
   if (step === -1) {
     return (
       <main className="quiz-layout">
+        <header className="site-header">
+          <span className="logo-mono">ESLINT GENERATOR</span>
+        </header>
         <div className="hero">
           <div className="hero-glow" />
           <div className="rings">

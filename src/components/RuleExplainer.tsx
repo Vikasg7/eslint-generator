@@ -25,36 +25,38 @@ export function RuleExplainer({ rules }: Props) {
         <span className="block-title">RULES EXPLAINED</span>
         <span className="rule-count">{rules.length} rules</span>
       </div>
-      {rules.map((rule) => (
-        <div key={rule.name} className="rule-item">
-          <button className="rule-row" onClick={() => toggle(rule.name)}>
-            <span className="rule-name">{rule.name}</span>
-            <span className={`severity ${severityClass(rule.severity)}`}>
-              {rule.severity}
-            </span>
-            <span className={`chevron ${open === rule.name ? "open" : ""}`}>
-              ▶
-            </span>
-          </button>
-          {open === rule.name && (
-            <div className="rule-body">
-              <p>{rule.desc}</p>
-              <p className="rule-why">
-                <strong>Why this rule?</strong> {rule.why}
-              </p>
-              {rule.docs && (
-                <a className="rule-docs"
-                  href={rule.docs}
-                  target="_blank"
-                  rel="noreferrer"
-                >
-                  ESLint docs →
-                </a>
-              )}
-            </div>
-          )}
-        </div>
-      ))}
+      <div className="rule-list">
+        {rules.map((rule) => (
+          <div key={rule.name} className="rule-item">
+            <button className="rule-row" onClick={() => toggle(rule.name)}>
+              <span className="rule-name">{rule.name}</span>
+              <span className={`severity ${severityClass(rule.severity)}`}>
+                {rule.severity}
+              </span>
+              <span className={`chevron ${open === rule.name ? "open" : ""}`}>
+                ▶
+              </span>
+            </button>
+            {open === rule.name && (
+              <div className="rule-body">
+                <p>{rule.desc}</p>
+                <p className="rule-why">
+                  <strong>Why this rule?</strong> {rule.why}
+                </p>
+                {rule.docs && (
+                  <a className="rule-docs"
+                    href={rule.docs}
+                    target="_blank"
+                    rel="noreferrer"
+                  >
+                    ESLint docs →
+                  </a>
+                )}
+              </div>
+            )}
+          </div>
+        ))}
+      </div>
     </div>
   )
 }

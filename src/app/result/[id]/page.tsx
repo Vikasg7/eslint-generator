@@ -7,7 +7,7 @@ import { InstallCommand }  from "@/components/InstallCommand"
 import { ShareButton }     from "@/components/ShareButton"
 
 interface Props {
-  params: { id: string }
+  params: Promise<{ id: string }> | { id: string }
 }
 
 const LABEL_MAP: Record<string, string> = {
@@ -20,8 +20,9 @@ const LABEL_MAP: Record<string, string> = {
   perf: "Performance", testing: "Testing",
 }
 
-export default function ResultPage({ params }: Props) {
-  const answers = decodeAnswers(params.id)
+export default async function ResultPage({ params }: Props) {
+  const { id } = await params
+  const answers = decodeAnswers(id)
   const config  = generateConfig(answers)
 
   const tags: string[] = [
@@ -34,9 +35,10 @@ export default function ResultPage({ params }: Props) {
 
   return (
     <main className="result-layout">
-      <div className="result-topbar">
+      <header className="site-header result-topbar">
+        <span className="logo-mono">ESLINT GENERATOR</span>
         <Link href="/" className="back-link">← back to quiz</Link>
-      </div>
+      </header>
 
       <div className="tags-row">
         {tags.map((tag) => (
