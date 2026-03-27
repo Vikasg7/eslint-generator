@@ -1,5 +1,21 @@
 import type { QuizAnswers } from "@/types/quiz"
 
+function getBasePath(): string {
+  const configuredBasePath =
+    process.env.NEXT_PUBLIC_BASE_PATH ??
+    (typeof window !== "undefined"
+      ? window.document.documentElement.dataset.basePath ?? ""
+      : "")
+
+  if (!configuredBasePath) {
+    return ""
+  }
+
+  return configuredBasePath.startsWith("/")
+    ? configuredBasePath
+    : `/${configuredBasePath}`
+}
+
 export function encodeAnswers(answers: Partial<QuizAnswers>): string {
   const json = JSON.stringify(answers)
   let b64: string
@@ -31,7 +47,8 @@ export function buildShareUrl(
   answers: Partial<QuizAnswers>,
   origin?: string
 ): string {
-  const id   = encodeAnswers(answers)
+  const id = encodeAnswers(answers)
+  const basePath = getBasePath()
   const base = origin ?? (typeof window !== "undefined" ? window.location.origin : "")
-  return `${base}/result/${id}`
+  return `${base}${basePath}/result?id=${id}`
 }

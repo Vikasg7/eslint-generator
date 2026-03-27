@@ -31,7 +31,7 @@ export default function HomePage() {
       setStep((s) => s + 1)
     } else {
       const id = encodeAnswers(answers)
-      router.push(`/result/${id}`)
+      router.push(`/result?id=${id}`)
     }
   }
 

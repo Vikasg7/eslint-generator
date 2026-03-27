@@ -35,6 +35,7 @@ export default function RootLayout({
     <html
       lang="en"
       className={`${syne.variable} ${jetbrainsMono.variable}`}
+      data-base-path={process.env.NEXT_PUBLIC_BASE_PATH ?? ""}
     >
       <body>{children}</body>
     </html>

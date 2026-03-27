@@ -1,36 +1,138 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Intuitive ESLint Generator
 
-## Getting Started
+Intuitive ESLint Generator is a polished Next.js app that helps developers build an ESLint configuration by answering a short quiz. It generates both modern flat config output and legacy `.eslintrc.json`, explains every included rule in plain English, builds install commands, and creates a shareable URL for the exact result.
 
-First, run the development server:
+The project is designed to work as a static site on GitHub Pages.
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+## Highlights
+
+- 5-step quiz flow with single-select and multi-select questions
+- Generates `eslint.config.js` and `.eslintrc.json`
+- Explains every generated rule with severity, reasoning, and docs links
+- Builds npm, pnpm, and yarn install commands
+- Shareable result URLs with zero backend
+- Dark, developer-tool-inspired UI
+- Static export compatible with GitHub Pages
+
+## Tech Stack
+
+- Next.js App Router
+- TypeScript
+- Pure CSS with global design tokens
+- `next/font/google` for Syne and JetBrains Mono
+- No runtime dependencies beyond Next.js, React, and React DOM
+
+## How It Works
+
+1. The user answers the quiz.
+2. The app encodes the answers into a compact base64url string.
+3. The result page decodes the answers client-side.
+4. A pure TypeScript generator builds the config text, install commands, and rule explanations.
+
+Because GitHub Pages is a static host, shared results use a query-parameter URL:
+
+```text
+/result?id=eyJmcmFtZXdvcmsiOiJyZWFjdCIsImxhbmciOiJ0cyIsLi4ufQ
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+This keeps sharing working without requiring dynamic server routes.
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## Local Development
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+Install dependencies:
 
-## Learn More
+```bash
+pnpm install
+```
 
-To learn more about Next.js, take a look at the following resources:
+Run the dev server:
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+```bash
+pnpm dev
+```
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+Type-check the app:
 
-## Deploy on Vercel
+```bash
+pnpm exec tsc --noEmit
+```
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+Create a production build:
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+```bash
+pnpm build
+```
+
+## GitHub Pages Deployment
+
+This repo is configured for GitHub Pages with:
+
+- `output: "export"` in `next.config.ts`
+- automatic `basePath` handling for project pages
+- a GitHub Actions workflow at [`.github/workflows/deploy.yml`](./.github/workflows/deploy.yml)
+
+### Enable Pages in GitHub
+
+1. Push the repository to GitHub.
+2. Open the repository settings.
+3. Go to `Settings` -> `Pages`.
+4. Set the source to `GitHub Actions`.
+5. Push to `main` or run the workflow manually.
+
+The workflow will:
+
+1. install dependencies
+2. build the static export
+3. upload the generated `out/` directory
+4. deploy it to GitHub Pages
+
+### Base Path Behavior
+
+If the site is deployed as a project page, for example:
+
+```text
+https://username.github.io/eslint-generator/
+```
+
+the build automatically uses `/eslint-generator` as the base path during GitHub Actions.
+
+If the site is deployed as a user/org root site such as:
+
+```text
+https://username.github.io/
+```
+
+no base path is added.
+
+## Project Structure
+
+```text
+src/
+  app/
+    layout.tsx
+    page.tsx
+    result/page.tsx
+    globals.css
+  components/
+    ConfigOutput.tsx
+    InstallCommand.tsx
+    QuizStep.tsx
+    RuleExplainer.tsx
+    ShareButton.tsx
+  lib/
+    encodeAnswers.ts
+    generateConfig.ts
+    quiz-steps.ts
+  types/
+    quiz.ts
+```
+
+## Notes
+
+- The config generator is pure and deterministic.
+- The result page is static-host friendly and does not rely on a backend.
+- The app targets the latest ESLint rule docs for core rule links.
+
+## License
+
+Use and adapt freely for your own projects unless you want to add a specific license file later.

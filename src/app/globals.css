@@ -90,7 +90,6 @@ pre, code { font-family: var(--font-mono); }
   display:         flex;
   align-items:     center;
   justify-content: space-between;
-  margin-bottom:   20px;
 }
 .back-link {
   font-family:    var(--font-mono);
