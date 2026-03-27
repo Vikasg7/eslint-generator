@@ -19,9 +19,9 @@ export const QUIZ_STEPS: QuizStep[] = [
     sub: "TypeScript unlocks type-aware linting rules.",
     type: "single",
     options: [
-      { value: "ts",    label: "TypeScript",              desc: "@typescript-eslint parser + rules" },
+      { value: "ts",    label: "TypeScript",              desc: "typescript-eslint presets + typed rules" },
       { value: "js",    label: "JavaScript only",         desc: "Standard ESLint parser" },
-      { value: "mixed", label: "Both (.ts and .js files)", desc: "Dual config per extension" },
+      { value: "mixed", label: "Both (.ts and .js files)", desc: "One config for TS + JS projects" },
     ],
   },
   {
@@ -47,6 +47,9 @@ export const QUIZ_STEPS: QuizStep[] = [
       { value: "security",  label: "Security",        desc: "eslint-plugin-security" },
       { value: "perf",      label: "Performance",     desc: "Avoid common perf traps" },
       { value: "testing",   label: "Testing",         desc: "jest / vitest rules" },
+      { value: "promises",  label: "Promise safety",  desc: "Catch async flow mistakes" },
+      { value: "cleanup",   label: "Cleanup",         desc: "Catch leftover debug code" },
+      { value: "maintainability", label: "Maintainability", desc: "Safer, clearer control flow" },
     ],
   },
   {

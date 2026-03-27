@@ -11,6 +11,34 @@ interface Props {
   onBack:    () => void
 }
 
+function getOptionMark(value: string): string {
+  const tokens: Record<string, string> = {
+    react: "RE",
+    vue: "VU",
+    node: "ND",
+    vanilla: "JS",
+    ts: "TS",
+    js: "JS",
+    mixed: "MX",
+    relaxed: "01",
+    moderate: "02",
+    strict: "03",
+    prettier: "PR",
+    imports: "IM",
+    a11y: "AX",
+    security: "SC",
+    perf: "PF",
+    testing: "TS",
+    promises: "PM",
+    cleanup: "CL",
+    maintainability: "MT",
+    beginner: "JR",
+    senior: "SR",
+  }
+
+  return tokens[value] ?? "•"
+}
+
 export function QuizStep({
   step,
   stepIndex,
@@ -27,6 +55,7 @@ export function QuizStep({
     ? [selected]
     : []
   const canContinue = isMulti || selectedArr.length > 0
+  const optionListClassName = isMulti ? "option-list option-grid" : "option-list"
 
   const isSelected = (val: string) =>
     isMulti ? selectedArr.includes(val) : selectedArr[0] === val
@@ -56,15 +85,17 @@ export function QuizStep({
       <h2 className="question">{step.question}</h2>
       <p className="question-sub">{step.sub}</p>
 
-      <div className="option-list">
+      <div className={optionListClassName}>
         {step.options.map((opt) => (
           <button
             key={opt.value}
+            type="button"
             className={["option", isSelected(opt.value) ? "selected" : ""]
               .filter(Boolean)
               .join(" ")}
             onClick={() => onSelect(opt.value)}
           >
+            <span className="option-icon">{getOptionMark(opt.value)}</span>
             <div className="option-text">
               <span className="option-label">{opt.label}</span>
               <span className="option-desc">{opt.desc}</span>
@@ -82,13 +113,14 @@ export function QuizStep({
 
       <div className="nav-row">
         {stepIndex > 0 ? (
-          <button className="btn-ghost" onClick={onBack}>
+          <button type="button" className="btn-ghost" onClick={onBack}>
             ← back
           </button>
         ) : (
           <span />
         )}
         <button
+          type="button"
           className="btn-primary"
           onClick={onNext}
           disabled={!canContinue}

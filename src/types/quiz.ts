@@ -2,7 +2,16 @@ export type Framework  = "react" | "vue" | "node" | "vanilla"
 export type Language   = "ts" | "js" | "mixed"
 export type Strictness = "relaxed" | "moderate" | "strict"
 export type Experience = "beginner" | "mixed" | "senior"
-export type Concern    = "prettier" | "imports" | "a11y" | "security" | "perf" | "testing"
+export type Concern    =
+  | "prettier"
+  | "imports"
+  | "a11y"
+  | "security"
+  | "perf"
+  | "testing"
+  | "promises"
+  | "cleanup"
+  | "maintainability"
 
 export interface QuizAnswers {
   framework:  Framework

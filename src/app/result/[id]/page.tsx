@@ -18,6 +18,9 @@ const LABEL_MAP: Record<string, string> = {
   prettier: "Prettier", imports: "Import order",
   a11y: "Accessibility", security: "Security",
   perf: "Performance", testing: "Testing",
+  promises: "Promise safety",
+  cleanup: "Cleanup",
+  maintainability: "Maintainability",
 }
 
 export default async function ResultPage({ params }: Props) {

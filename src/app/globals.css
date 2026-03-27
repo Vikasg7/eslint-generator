@@ -43,6 +43,11 @@ a { color: inherit; text-decoration: none; }
 button { font-family: inherit; }
 pre, code { font-family: var(--font-mono); }
 
+:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+
 /* ── Page layouts ────────────────────────────────────────────── */
 .quiz-layout {
   max-width:      1100px;
@@ -69,10 +74,12 @@ pre, code { font-family: var(--font-mono); }
   gap:        48px;
   flex:       1;
   position:   relative;
+  justify-content: center;
 }
 .quiz-step-col {
   flex:      1;
-  max-width: 420px;
+  width:     100%;
+  max-width: 640px;
 }
 .result-layout {
   max-width: 1100px;
@@ -229,6 +236,11 @@ pre, code { font-family: var(--font-mono); }
   margin-bottom: 24px;
 }
 .option-list { display: flex; flex-direction: column; gap: 8px; margin-bottom: 28px; }
+.option-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px;
+}
 .option {
   display:       flex;
   align-items:   center;
@@ -244,6 +256,24 @@ pre, code { font-family: var(--font-mono); }
 }
 .option:hover    { border-color: var(--border-hover); background: var(--bg2); }
 .option.selected { border-color: var(--accent); background: var(--accent-dim); }
+.option-grid .option {
+  min-height: 88px;
+}
+.option-icon {
+  width:         32px;
+  height:        32px;
+  display:       flex;
+  align-items:   center;
+  justify-content: center;
+  flex-shrink:   0;
+  border-radius: var(--radius-md);
+  border:        1px solid var(--border);
+  background:    var(--bg3);
+  font-family:   var(--font-mono);
+  font-size:     10px;
+  color:         var(--text2);
+  letter-spacing: 0.04em;
+}
 .option-text { flex: 1; }
 .option-label {
   display:     block;
@@ -293,51 +323,6 @@ pre, code { font-family: var(--font-mono); }
   align-items:     center;
 }
 
-/* ── Live preview ────────────────────────────────────────────── */
-.live-preview {
-  width:        240px;
-  flex-shrink:  0;
-  position:     sticky;
-  top:          32px;
-  align-self:   flex-start;
-  background:   var(--bg1);
-  border:       1px solid var(--border);
-  border-radius: var(--radius-xl);
-  overflow:     hidden;
-}
-.preview-header {
-  display:      flex;
-  align-items:  center;
-  gap:          8px;
-  padding:      10px 14px;
-  border-bottom: 1px solid var(--border);
-  background:   var(--bg2);
-}
-.preview-dot {
-  display:      block;
-  width:        6px;
-  height:       6px;
-  border-radius: 50%;
-  background:   var(--accent);
-  box-shadow:   0 0 4px var(--accent);
-  animation:    blink 1.5s ease-in-out infinite;
-}
-.preview-title {
-  font-family:    var(--font-mono);
-  font-size:      10px;
-  color:          var(--text3);
-  letter-spacing: 0.04em;
-}
-.preview-body {
-  padding:   12px 14px;
-  font-size: 10px;
-  line-height: 1.8;
-  color:     var(--text2);
-  overflow:  hidden;
-}
-.preview-line { white-space: pre; }
-.preview-line.muted { color: var(--text3); }
-
 /* ── Config output ───────────────────────────────────────────── */
 .tab-row { display: flex; gap: 2px; flex-wrap: wrap; min-width: 0; }
 .tab {
@@ -358,11 +343,11 @@ pre, code { font-family: var(--font-mono); }
 .rule-explainer {
   display:        flex;
   flex-direction: column;
-  max-height:     min(62dvh, 720px);
 }
 
 .code-block {
   max-width:      100%;
+  max-height:     320px;
   min-height:     0;
   flex:           1;
   padding:        16px;
@@ -456,11 +441,14 @@ pre, code { font-family: var(--font-mono); }
 
 .install-cmd {
   display:       inline-block;
-  min-width:     max-content;
+  min-width:     0;
+  max-width:     100%;
   font-family:   var(--font-mono);
   font-size:     10px;
   color:         var(--text2);
-  white-space:   pre;
+  white-space:   nowrap;
+  overflow:      hidden;
+  text-overflow: ellipsis;
 }
 .copy-mini {
   font-family:    var(--font-mono);
@@ -487,6 +475,10 @@ pre, code { font-family: var(--font-mono); }
   min-height:      0;
   overflow-y:      auto;
   scrollbar-width: thin;
+}
+.rule-explainer {
+  max-height: 420px;
+  overflow-y: auto;
 }
 
 .rule-item { border-bottom: 1px solid var(--border); }
@@ -576,10 +568,22 @@ pre, code { font-family: var(--font-mono); }
 
 /* ── Hero ────────────────────────────────────────────────────── */
 .hero {
-  flex:     1;
-  position: relative;
-  padding:  48px 0 40px;
-  overflow: hidden;
+  flex:                  1;
+  display:               grid;
+  grid-template-columns: minmax(0, 1fr) minmax(320px, 420px);
+  align-items:           flex-start;
+  gap:                   48px;
+  padding:               0 0 40px;
+}
+.hero-copy {
+  min-width: 0;
+}
+.hero-visual {
+  position:       relative;
+  display:        flex;
+  align-items:    flex-start;
+  justify-content: center;
+  min-height:     520px;
 }
 .hero-glow {
   position:   absolute;
@@ -587,24 +591,10 @@ pre, code { font-family: var(--font-mono); }
   height:     600px;
   border-radius: 50%;
   background: radial-gradient(ellipse, rgba(129,140,248,0.07) 0%, transparent 70%);
-  top:        -150px;
-  right:      -100px;
+  top:        0;
+  left:       50%;
+  transform:  translate(-50%, -50%);
   pointer-events: none;
-}
-.rings {
-  position:       absolute;
-  top:            120px;
-  right:          80px;
-  pointer-events: none;
-}
-.ring {
-  position:      absolute;
-  border-radius: 50%;
-  border:        1px solid rgba(129,140,248,0.25);
-  transform:     translate(-50%, -50%);
-  top:           50%;
-  left:          50%;
-  animation:     pulse-ring 4s ease-in-out infinite;
 }
 .hero-badge {
   display:        inline-flex;
@@ -670,7 +660,7 @@ pre, code { font-family: var(--font-mono); }
 }
 .hero-stats {
   display:     flex;
-  align-items: center;
+  align-items: stretch;
   gap:         28px;
   position:    relative;
   z-index:     1;
@@ -701,9 +691,7 @@ pre, code { font-family: var(--font-mono); }
 
 /* Floating code card */
 .hero-code-card {
-  position:      absolute;
-  top:           40px;
-  right:         0;
+  position:      relative;
   width:         260px;
   background:    var(--bg1);
   border:        1px solid var(--border);
@@ -766,11 +754,13 @@ pre, code { font-family: var(--font-mono); }
   .result-layout  { padding: 20px; }
   .quiz-body      { flex-direction: column; gap: 24px; }
   .quiz-step-col  { max-width: 100%; }
-  .live-preview   { display: none; }
+  .option-grid    { grid-template-columns: 1fr; }
   .result-grid    { grid-template-columns: 1fr; }
   .config-output,
   .rule-explainer { max-height: none; }
   .install-row    { grid-template-columns: 1fr; align-items: flex-start; }
+  .hero           { grid-template-columns: 1fr; gap: 24px; padding-bottom: 16px; }
+  .hero-visual    { min-height: auto; }
   .hero-code-card { display: none; }
   .rings          { display: none; }
   .hero-heading   { font-size: 36px; }

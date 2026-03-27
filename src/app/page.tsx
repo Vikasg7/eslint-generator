@@ -4,7 +4,6 @@ import { useRouter } from "next/navigation"
 import { QUIZ_STEPS }      from "@/lib/quiz-steps"
 import { encodeAnswers }   from "@/lib/encodeAnswers"
 import { QuizStep }        from "@/components/QuizStep"
-import { LivePreview }     from "@/components/LivePreview"
 import type { QuizAnswers } from "@/types/quiz"
 
 export default function HomePage() {
@@ -48,84 +47,83 @@ export default function HomePage() {
           <span className="logo-mono">ESLINT GENERATOR</span>
         </header>
         <div className="hero">
-          <div className="hero-glow" />
-          <div className="rings">
-            <div className="ring" style={{ width: 120, height: 120 }} />
-            <div className="ring" style={{ width: 220, height: 220, animationDelay: "0.6s" }} />
-            <div className="ring" style={{ width: 340, height: 340, animationDelay: "1.2s" }} />
-            <div className="ring" style={{ width: 480, height: 480, animationDelay: "1.8s" }} />
-          </div>
-
-          <div className="hero-badge">
-            <span className="badge-dot" />
-            v1.0 — no account required
-          </div>
-
-          <h1 className="hero-heading">
-            ESLint config,<br />
-            <em>done right.</em>
-          </h1>
-
-          <p className="hero-sub">
-            Answer 5 questions. Get a tailored ESLint config with every rule
-            explained — flat or legacy format, ready to paste.
-          </p>
-
-          <div className="hero-cta-row">
-            <button className="btn-primary" onClick={() => setStep(0)}>
-              Start the quiz →
-            </button>
-            <a className="btn-ghost"
-              href="https://github.com"
-              target="_blank"
-              rel="noreferrer"
-            >
-              View on GitHub
-            </a>
-          </div>
-
-          <div className="hero-stats">
-            <div className="stat-item">
-              <span className="stat-num">5</span>
-              <span className="stat-label">questions</span>
+          <div className="hero-copy">
+            <div className="hero-badge">
+              <span className="badge-dot" />
+              v1.0 — no account required
             </div>
-            <div className="stat-divider" />
-            <div className="stat-item">
-              <span className="stat-num">2</span>
-              <span className="stat-label">output formats</span>
+
+            <h1 className="hero-heading">
+              ESLint config,<br />
+              <em>done right.</em>
+            </h1>
+
+            <p className="hero-sub">
+              Answer 5 questions. Get a tailored ESLint config with every rule
+              explained — flat or legacy format, ready to paste.
+            </p>
+
+            <div className="hero-cta-row">
+              <button className="btn-primary" onClick={() => setStep(0)}>
+                Start the quiz →
+              </button>
+              <a className="btn-ghost"
+                href="https://github.com"
+                target="_blank"
+                rel="noreferrer"
+              >
+                View on GitHub
+              </a>
             </div>
-            <div className="stat-divider" />
-            <div className="stat-item">
-              <span className="stat-num">0</span>
-              <span className="stat-label">signup needed</span>
+
+            <div className="hero-stats">
+              <div className="stat-item">
+                <span className="stat-num">5</span>
+                <span className="stat-label">questions</span>
+              </div>
+              <div className="stat-divider" />
+              <div className="stat-item">
+                <span className="stat-num">2</span>
+                <span className="stat-label">output formats</span>
+              </div>
+              <div className="stat-divider" />
+              <div className="stat-item">
+                <span className="stat-num">0</span>
+                <span className="stat-label">signup needed</span>
+              </div>
             </div>
           </div>
 
-          {/* Floating code card */}
-          <div className="hero-code-card">
-            <div className="code-card-header">
-              <span className="dot dot-r" />
-              <span className="dot dot-a" />
-              <span className="dot dot-g" />
-              <span className="code-card-title">eslint.config.js</span>
+          <div className="hero-visual" aria-hidden="true">
+            <div className="hero-glow" />
+
+            <div className="hero-code-card">
+              <div className="code-card-header">
+                <span className="dot dot-r" />
+                <span className="dot dot-a" />
+                <span className="dot dot-g" />
+                <span className="code-card-title">eslint.config.js</span>
+              </div>
+              <pre className="code-card-body">
+                <div><span className="ck">const</span> {"{ defineConfig }"} =</div>
+                <div>  <span className="cn">require</span>(<span className="cs">&quot;eslint/config&quot;</span>)</div>
+                <div><span className="ck">const</span> js = <span className="cn">require</span>(<span className="cs">&quot;@eslint/js&quot;</span>)</div>
+                <div><span className="ck">const</span> tseslint =</div>
+                <div>  <span className="cn">require</span>(<span className="cs">&quot;typescript-eslint&quot;</span>)</div>
+                <div>&nbsp;</div>
+                <div>module.<span className="cn">exports</span> = <span className="cn">defineConfig</span>([</div>
+                <div>  js.configs.<span className="cn">recommended</span>,</div>
+                <div>  ...tseslint.configs.<span className="cn">recommended</span>,</div>
+                <div>  {"{"}</div>
+                <div>    rules: {"{"}</div>
+                <div>      <span className="cs">&quot;no-console&quot;</span>: <span className="cp">&quot;warn&quot;</span>,</div>
+                <div>      <span className="cs">&quot;eqeqeq&quot;</span>: <span className="cp">&quot;error&quot;</span>,</div>
+                <div>      <span className="cs">&quot;prefer-const&quot;</span>: <span className="cp">&quot;error&quot;</span></div>
+                <div>    {"}"}</div>
+                <div>  {"}"}</div>
+                <div>])</div>
+              </pre>
             </div>
-            <pre className="code-card-body">
-              <div><span className="ck">import</span> js <span className="ck">from</span> <span className="cs">&quot;@eslint/js&quot;</span></div>
-              <div><span className="ck">import</span> ts <span className="ck">from</span> <span className="cs">&quot;@typescript-eslint/</span></div>
-              <div><span className="cs">  eslint-plugin&quot;</span></div>
-              <div>&nbsp;</div>
-              <div><span className="ck">export default</span> [</div>
-              <div>  js.configs.<span className="cn">recommended</span>,</div>
-              <div>  ...ts.configs.<span className="cn">recommended</span>,</div>
-              <div>  {"{"}</div>
-              <div>    rules: {"{"}</div>
-              <div>      <span className="cs">&quot;no-unused-vars&quot;</span>:</div>
-              <div>        <span className="cp">&quot;error&quot;</span>,</div>
-              <div>      <span className="cs">&quot;eqeqeq&quot;</span>: <span className="cp">&quot;error&quot;</span></div>
-              <div>    {"}"}</div>
-              <div>  {"}"}</div>
-              <div>]</div>
-            </pre>
           </div>
         </div>
       </main>
@@ -152,7 +150,6 @@ export default function HomePage() {
             onBack={handleBack}
           />
         </div>
-        <LivePreview answers={answers} />
       </div>
     </main>
   )

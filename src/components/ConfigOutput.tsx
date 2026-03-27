@@ -33,12 +33,14 @@ export function ConfigOutput({ config }: Props) {
       <div className="block-header">
         <div className="tab-row">
           <button
+            type="button"
             className={tab === "flat" ? "tab active" : "tab"}
             onClick={() => setTab("flat")}
           >
             eslint.config.js
           </button>
           <button
+            type="button"
             className={tab === "legacy" ? "tab active" : "tab"}
             onClick={() => setTab("legacy")}
           >
@@ -46,10 +48,10 @@ export function ConfigOutput({ config }: Props) {
           </button>
         </div>
         <div className="action-row">
-          <button className="action-btn" onClick={handleDownload}>
+          <button type="button" className="action-btn" onClick={handleDownload}>
             ↓ download
           </button>
-          <button className="action-btn primary" onClick={handleCopy}>
+          <button type="button" className="action-btn primary" onClick={handleCopy}>
             {copied ? "copied!" : "copy config"}
           </button>
         </div>
