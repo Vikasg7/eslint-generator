@@ -9,10 +9,10 @@ interface Props {
 
 export function ShareButton({ answers }: Props) {
   const [copied, setCopied] = useState(false)
-  const url = buildShareUrl(answers)
+  const sharePath = buildShareUrl(answers, "")
 
   async function handleCopy(): Promise<void> {
-    await navigator.clipboard.writeText(url)
+    await navigator.clipboard.writeText(buildShareUrl(answers, window.location.origin))
     setCopied(true)
     setTimeout(() => setCopied(false), 2000)
   }
@@ -20,8 +20,8 @@ export function ShareButton({ answers }: Props) {
   return (
     <div className="share-bar">
       <span className="share-label">share</span>
-      <span className="share-url" title={url}>{url}</span>
-      <button className="action-btn" onClick={handleCopy}>
+      <span className="share-url" title={sharePath}>{sharePath}</span>
+      <button type="button" className="action-btn" onClick={handleCopy}>
         {copied ? "copied!" : "copy link"}
       </button>
     </div>
